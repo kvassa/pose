@@ -1,0 +1,49 @@
+---
+description: How to work through tasks.md — one atomic task at a time
+alwaysApply: true
+---
+
+# Workflow
+
+This project is built via [tasks.md](mdc:tasks.md) — a granular, sequential build plan. Each task is atomic and testable.
+
+## Rules
+
+1. **Do one task at a time.** Do not combine tasks. Do not skip ahead. If the user asks for "task 7.3", do only 7.3.
+2. **Respect "out of scope" on every task.** If something feels like it belongs in a later task, leave it for later.
+3. **Run the test specified in the task.** Confirm it passes before declaring done.
+4. **If a task has unmet dependencies, stop and say so.** Don't silently build the dependencies.
+5. **Commit after each task** with a lowercase message like `task 7.3: insert references row after upload`.
+
+## When the user asks "do the next task"
+
+1. Open [tasks.md](mdc:tasks.md).
+2. Find the next unchecked task (assume sequential order — earlier tasks are prerequisites).
+3. State the task number and goal back to the user before starting any code.
+4. Execute the listed steps in order.
+5. Run the test.
+6. **Stop.** Wait for human verification before moving on.
+
+## When the user asks for a specific task by number
+
+1. Confirm the task number and quote its Goal and Test.
+2. Check if earlier tasks in the list are likely done. If unclear, ask.
+3. Execute. Then stop.
+
+## When you finish a task
+
+Output exactly:
+- What you did (1–2 lines)
+- The test result
+- The next task number (just the ID, do not start it)
+
+## When in doubt about a design decision
+
+Refer to [architecture.md](mdc:architecture.md). Do not invent new architecture. If the architecture doc is missing something, surface the question to the user before deciding.
+
+## Anti-patterns to avoid
+
+- Don't refactor adjacent code "while you're in there."
+- Don't add features the task doesn't ask for.
+- Don't add tests beyond what the task specifies. Coverage is good elsewhere — here we follow the plan.
+- Don't introduce libraries not listed in the locked stack. If you think one is needed, ask.

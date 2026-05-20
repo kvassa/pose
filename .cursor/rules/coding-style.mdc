@@ -1,0 +1,66 @@
+---
+description: Coding conventions for Pose Match
+alwaysApply: true
+---
+
+# Coding Style
+
+## TypeScript
+
+- Strict mode everywhere. `strict: true`. No `any` unless genuinely impossible.
+- Prefer `type` over `interface` for data shapes; use `interface` only for class contracts.
+- Named exports > default exports.
+- No barrel files except at package public-API boundaries (`packages/*/src/index.ts`).
+- Imports: workspace packages via `@pose-match/*`, never via relative paths across packages.
+
+## React / React Native
+
+- Functional components only. No class components.
+- One component per file.
+- No `useContext` for shared state — use Zustand.
+- No inline `StyleSheet.create` calls inside render. Define at module bottom.
+
+## State management discipline (CRITICAL)
+
+- **Per-frame data** (anything updated at >5Hz, e.g., keypoints, match score) → Reanimated shared values. Never React state.
+- **Session-level UI state** → Zustand session store (`sessionStore.ts`). Cleared on screen exit.
+- **Persistent / server-synced state** → Zustand persistent store, backed by Supabase via React Query.
+- If you find yourself bridging tiers (e.g., calling `setState` from a frame processor), stop and reconsider.
+
+## `pose-math` package
+
+- Pure TypeScript. No React, no native deps, no DOM, no Node.
+- Every public function has a vitest test.
+- All math is unit-tested with hand-computed expected values, not snapshots.
+
+## Native modules
+
+- Android: Kotlin, in `apps/mobile/android/app/src/main/java/.../pose/`.
+- iOS: Swift, in `apps/mobile/ios/PoseModule/`.
+- Both expose identical JS interfaces. The TS wrapper hides platform differences.
+
+## File naming
+
+- React components: `PascalCase.tsx`
+- Hooks: `useThing.ts`
+- Utilities and modules: `camelCase.ts`
+- Native modules: `PoseModule.kt` / `PoseModule.swift`
+- Tests: co-located, `Thing.test.ts`
+
+## Commits
+
+- Lowercase, scoped: `task 7.3: insert references row after upload`
+- One commit per completed task.
+- No "wip" or "fix stuff" commits on main.
+
+## Supabase
+
+- Migrations are append-only. Never edit a migration that has been pushed.
+- RLS policies are part of the migration that creates the table.
+- Edge functions are Deno/TS. No npm dependencies that aren't Deno-compatible.
+
+## Python (pose-worker)
+
+- Python 3.11+, type hints everywhere.
+- Pydantic for request/response models.
+- Pytest for tests, fixtures co-located.

@@ -1,0 +1,62 @@
+---
+description: Pose Match — project context, tech stack, and core non-negotiables
+alwaysApply: true
+---
+
+# Pose Match — Project Context
+
+You are working on **Pose Match**, a mobile AR app that takes a reference photo (typically a Pinterest pose) and overlays it onto a live camera feed, guiding both the subject and the photographer into the matching shot.
+
+## The wedge
+
+"I have THIS specific photo and I want THIS specific shot." Not generic pose suggestions — exact recreation. Keep this in mind for every product decision.
+
+## Two failure modes the app must independently diagnose
+
+1. **Subject guidance** — is the person in the right shape? (limb positions, head tilt, body orientation)
+2. **Camera guidance** — is the lens in the right place? (framing, height, distance, angle)
+
+## Tech stack (locked — do not deviate)
+
+| Layer | Choice |
+|---|---|
+| Mobile framework | React Native + Expo bare workflow |
+| Camera | react-native-vision-camera v4+ |
+| On-device ML | MediaPipe Pose Landmarker (lite) via native bridge |
+| Overlay rendering | @shopify/react-native-skia |
+| Client state | Zustand + Reanimated shared values |
+| Backend | Supabase (Postgres + Auth + Storage + Realtime) |
+| Pose worker | Python (FastAPI + MediaPipe heavy) on Railway/Fly |
+| Authz | Postgres RLS — no dedicated API server |
+| Monorepo | pnpm workspaces |
+
+## Where to find detail
+
+- **Full architecture:** [architecture.md](mdc:architecture.md) — read before any structural decision
+- **Build plan:** [tasks.md](mdc:tasks.md) — atomic, sequential tasks; complete one at a time
+
+## Non-negotiables
+
+- **ML and rendering run on-device.** Per-frame data never crosses the JS bridge.
+- **No dedicated API server.** Mobile talks to Supabase directly; RLS handles authz; one Python worker handles reference keypoint extraction.
+- **`pose-math` is pure TS, no native deps.** Used by both client (live matching) and worker (validation).
+- **Three state tiers in mobile:** per-frame (Reanimated shared values), session (Zustand), persistent (Zustand + Supabase). Do not mix tiers.
+- **The frame processor never calls React state.** Anything 30fps writes to a shared value.
+
+## What's deliberately out of scope for v1
+
+Scene/environment matching, multi-person poses, voice cues, social/sharing, web app, real-time multi-device collaboration. If a request touches these, flag as out-of-scope before building anything.
+
+## Repo target structure
+
+```
+pose-match/
+├── apps/mobile/             # React Native app (Expo bare)
+├── services/pose-worker/    # Python keypoint extraction service
+├── packages/
+│   ├── pose-math/           # Pure TS comparison logic
+│   └── shared-types/        # Shared TS types
+└── supabase/
+    ├── migrations/          # Postgres schema + RLS
+    └── functions/           # Edge functions (Deno/TS)
+```
