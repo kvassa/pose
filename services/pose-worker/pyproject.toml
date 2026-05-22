@@ -1,0 +1,26 @@
+[project]
+name = "pose-worker"
+version = "0.0.0"
+description = "Pose Match reference keypoint extraction service"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "mediapipe>=0.10.0",
+  "pillow>=11.0.0",
+  "httpx>=0.28.0",
+  "pydantic>=2.10.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

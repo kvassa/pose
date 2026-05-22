@@ -1,0 +1,13 @@
+# Use ONE layout (see services/pose-worker/README.md):
+# A) Root Directory = services/pose-worker  → uses Dockerfile in this folder
+# B) Root Directory = (empty)               → uses /Dockerfile at repo root
+
+[build]
+builder = "DOCKERFILE"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+
+# MediaPipe + model need >512MB; bump in Railway Settings → Resources if OOM.
