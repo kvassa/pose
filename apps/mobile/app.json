@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Pose Match",
+    "slug": "pose-match",
+    "scheme": "posematch",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.posematch.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.posematch.app"
+    }
+  }
+}
