@@ -1,7 +1,8 @@
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 
+import { useAuthStore } from '../src/state/authStore';
 import { supabase } from '../src/supabase/client';
 
 export default function HomeScreen() {
@@ -19,6 +20,14 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Pose Match' }} />
       <Text style={styles.heading}>Pose Match</Text>
+      {/* TEMP (task 5.4 test): with no user this prints null */}
+      <Button
+        title="log auth state"
+        onPress={() => {
+          const { user, session } = useAuthStore.getState();
+          console.log('auth state:', { user, session });
+        }}
+      />
     </View>
   );
 }
