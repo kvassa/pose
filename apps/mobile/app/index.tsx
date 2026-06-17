@@ -1,3 +1,4 @@
+import * as ImagePicker from 'expo-image-picker';
 import { Link, Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
@@ -6,6 +7,15 @@ import { useAuthStore } from '../src/state/authStore';
 import { supabase } from '../src/supabase/client';
 
 export default function HomeScreen() {
+  const handleAddReference = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+    });
+
+    if (result.canceled) return;
+    console.log('picked reference image:', result.assets[0].uri);
+  };
+
   // TEMP (task 5.3 test): verify supabase client — expect [] (RLS blocks anon)
   useEffect(() => {
     supabase
@@ -20,6 +30,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Pose Match' }} />
       <Text style={styles.heading}>Pose Match</Text>
+      <Button title="Add reference" onPress={handleAddReference} />
       <Link href="/sign-in" style={styles.link}>
         Sign in
       </Link>
