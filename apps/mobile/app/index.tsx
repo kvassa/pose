@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 
@@ -20,6 +20,9 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Pose Match' }} />
       <Text style={styles.heading}>Pose Match</Text>
+      <Link href="/sign-in" style={styles.link}>
+        Sign in
+      </Link>
       {/* TEMP (task 5.4 test): with no user this prints null */}
       <Button
         title="log auth state"
@@ -42,5 +45,9 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: '600',
+  },
+  link: {
+    color: '#2563eb',
+    fontSize: 16,
   },
 });
