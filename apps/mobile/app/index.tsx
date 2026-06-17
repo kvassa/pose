@@ -23,6 +23,9 @@ export default function HomeScreen() {
       <Link href="/sign-in" style={styles.link}>
         Sign in
       </Link>
+      <Link href="/sign-up" style={styles.link}>
+        Sign up
+      </Link>
       {/* TEMP (task 5.4 test): with no user this prints null */}
       <Button
         title="log auth state"
