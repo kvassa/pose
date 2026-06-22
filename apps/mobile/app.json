@@ -15,6 +15,13 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fe5af41a-03e3-4121-9577-ee76b6e745c1"
+      }
+    },
+    "owner": "kvassa"
   }
 }
