@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack } from 'expo-router';
 import { Button, FlatList, StyleSheet, Text, View } from 'react-native';
@@ -25,8 +26,15 @@ export default function HomeScreen() {
     }
 
     const { uri } = result.assets[0];
+    // iPhone photos are often HEIC, which the worker's Pillow can't decode.
+    // Re-encode to JPEG so the stored bytes match the .jpg/image-jpeg we declare.
+    const context = ImageManipulator.manipulate(uri);
+    const rendered = await context.renderAsync();
+    const { uri: jpegUri } = await rendered.saveAsync({ format: SaveFormat.JPEG });
+    context.release();
+    rendered.release();
     // arrayBuffer is reliable in React Native; Blob bodies can upload as 0 bytes
-    const arrayBuffer = await fetch(uri).then((r) => r.arrayBuffer());
+    const arrayBuffer = await fetch(jpegUri).then((r) => r.arrayBuffer());
     const path = `${userId}/${Crypto.randomUUID()}.jpg`;
 
     const { error: uploadError } = await supabase.storage
