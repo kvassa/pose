@@ -1,9 +1,10 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
   type LayoutChangeEvent,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -86,6 +87,11 @@ export default function ReferenceDetailScreen() {
             ))
           : null}
       </View>
+      <Link href={`/shoot/${reference.id}`} asChild>
+        <Pressable style={styles.shootButton}>
+          <Text style={styles.shootButtonText}>Open camera</Text>
+        </Pressable>
+      </Link>
     </View>
   );
 }
@@ -115,5 +121,17 @@ const styles = StyleSheet.create({
   },
   status: {
     color: '#666',
+  },
+  shootButton: {
+    margin: 16,
+    backgroundColor: '#111',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  shootButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

@@ -14,7 +14,14 @@
       "package": "com.posematch.app"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-dev-client",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Pose Match needs camera access to help you match poses."
+        }
+      ]
     ],
     "extra": {
       "router": {},
