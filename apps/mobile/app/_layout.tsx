@@ -1,3 +1,6 @@
+import 'react-native-worklets-core';
+import 'react-native-reanimated';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect, useState } from 'react';

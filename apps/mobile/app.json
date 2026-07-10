@@ -19,7 +19,8 @@
       [
         "react-native-vision-camera",
         {
-          "cameraPermissionText": "Pose Match needs camera access to help you match poses."
+          "cameraPermissionText": "Pose Match needs camera access to help you match poses.",
+          "enableFrameProcessors": true
         }
       ]
     ],

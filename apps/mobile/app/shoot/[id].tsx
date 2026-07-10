@@ -11,8 +11,9 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Camera, useCameraDevice } from 'react-native-vision-camera';
+import { type CameraPosition, useCameraDevice } from 'react-native-vision-camera';
 
+import { CameraView } from '../../src/camera/CameraView';
 import { useCameraPermissions } from '../../src/camera/useCameraPermissions';
 import { supabase } from '../../src/supabase/client';
 import { useReference } from '../../src/supabase/queries';
@@ -35,7 +36,8 @@ export default function ShootScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: reference, isLoading } = useReference(id);
   const { granted, request } = useCameraPermissions();
-  const device = useCameraDevice('back');
+  const [facing, setFacing] = useState<CameraPosition>('back');
+  const device = useCameraDevice(facing);
   const isFocused = useIsFocused();
   const appIsActive = useAppIsActive();
   const isActive = isFocused && appIsActive;
@@ -79,7 +81,7 @@ export default function ShootScreen() {
     return (
       <View style={styles.center}>
         <Stack.Screen options={{ title: 'Shoot', headerShown: false }} />
-        <Text style={styles.message}>No back camera found on this device.</Text>
+        <Text style={styles.message}>No {facing} camera found on this device.</Text>
       </View>
     );
   }
@@ -87,7 +89,11 @@ export default function ShootScreen() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Shoot', headerShown: false }} />
-      <Camera style={StyleSheet.absoluteFill} device={device} isActive={isActive} />
+      <CameraView
+        device={device}
+        isActive={isActive}
+        onFlipCamera={() => setFacing((current) => (current === 'back' ? 'front' : 'back'))}
+      />
       {thumbnailUrl ? (
         <Image source={{ uri: thumbnailUrl }} style={styles.thumbnail} />
       ) : null}
