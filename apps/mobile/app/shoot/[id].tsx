@@ -92,6 +92,8 @@ export default function ShootScreen() {
       <CameraView
         device={device}
         isActive={isActive}
+        targetKeypoints={reference.keypoints}
+        targetImageUrl={thumbnailUrl}
         onFlipCamera={() => setFacing((current) => (current === 'back' ? 'front' : 'back'))}
       />
       {thumbnailUrl ? (

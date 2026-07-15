@@ -118,39 +118,28 @@ final class PoseLandmarkerHelper {
     return destination
   }
 
-  private func mpImage(
-    from sampleBuffer: CMSampleBuffer,
-    orientation: UIImage.Orientation
-  ) -> MPImage? {
+  /// Landmarks in raw buffer space (.up). JS maps using frame.orientation + mirror + cover.
+  private func mpImage(from sampleBuffer: CMSampleBuffer) -> MPImage? {
     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
 
     if isBgra(pixelBuffer) {
-      if let mpImage = try? MPImage(sampleBuffer: sampleBuffer, orientation: orientation) {
+      if let mpImage = try? MPImage(sampleBuffer: sampleBuffer, orientation: .up) {
         return mpImage
       }
-      if let mpImage = try? MPImage(pixelBuffer: pixelBuffer, orientation: orientation) {
+      if let mpImage = try? MPImage(pixelBuffer: pixelBuffer, orientation: .up) {
         return mpImage
       }
     }
 
     guard let bgraBuffer = convertToBgra(pixelBuffer) else { return nil }
-    return try? MPImage(pixelBuffer: bgraBuffer, orientation: orientation)
+    return try? MPImage(pixelBuffer: bgraBuffer, orientation: .up)
   }
 
-  private func mpImage(from image: UIImage) -> MPImage? {
-    try? MPImage(uiImage: image)
-  }
-
-  func detect(
-    sampleBuffer: CMSampleBuffer,
-    orientation: UIImage.Orientation,
-    isMirrored: Bool
-  ) -> [NSNumber]? {
+  func detect(sampleBuffer: CMSampleBuffer) -> [NSNumber]? {
     lock.lock()
     defer { lock.unlock() }
 
-    let adjustedOrientation = Self.adjustedOrientation(orientation, isMirrored: isMirrored)
-    guard let mpImage = mpImage(from: sampleBuffer, orientation: adjustedOrientation) else { return nil }
+    guard let mpImage = mpImage(from: sampleBuffer) else { return nil }
     return detect(mpImage: mpImage, timestampMs: nextTimestampMs(from: sampleBuffer))
   }
 
@@ -158,27 +147,8 @@ final class PoseLandmarkerHelper {
     lock.lock()
     defer { lock.unlock() }
 
-    guard let mpImage = mpImage(from: image) else { return nil }
+    guard let mpImage = try? MPImage(uiImage: image) else { return nil }
     lastTimestampMs += 33
     return detect(mpImage: mpImage, timestampMs: lastTimestampMs)
-  }
-
-  private static func adjustedOrientation(
-    _ orientation: UIImage.Orientation,
-    isMirrored: Bool
-  ) -> UIImage.Orientation {
-    guard isMirrored else { return orientation }
-
-    switch orientation {
-    case .up: return .upMirrored
-    case .down: return .downMirrored
-    case .left: return .leftMirrored
-    case .right: return .rightMirrored
-    case .upMirrored: return .up
-    case .downMirrored: return .down
-    case .leftMirrored: return .right
-    case .rightMirrored: return .left
-    @unknown default: return orientation
-    }
   }
 }
