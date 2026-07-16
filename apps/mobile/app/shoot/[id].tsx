@@ -93,6 +93,7 @@ export default function ShootScreen() {
         device={device}
         isActive={isActive}
         targetKeypoints={reference.keypoints}
+        targetBbox={reference.bounding_box}
         targetImageUrl={thumbnailUrl}
         onFlipCamera={() => setFacing((current) => (current === 'back' ? 'front' : 'back'))}
       />

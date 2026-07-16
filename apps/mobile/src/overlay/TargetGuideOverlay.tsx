@@ -134,7 +134,7 @@ export function TargetGuideOverlay({ imageUrl, keypoints }: TargetGuideOverlayPr
               path={limbPath}
               color={NEON_GLOW}
               style="stroke"
-              strokeWidth={22}
+              strokeWidth={18}
               strokeJoin="round"
               strokeCap="round"
             />
@@ -142,14 +142,14 @@ export function TargetGuideOverlay({ imageUrl, keypoints }: TargetGuideOverlayPr
               path={limbPath}
               color={NEON_CORE}
               style="stroke"
-              strokeWidth={10}
+              strokeWidth={8}
               strokeJoin="round"
               strokeCap="round"
             />
 
             <Circle cx={headCx} cy={headCy} r={headGlowR} color={NEON_GLOW} />
             <Circle cx={headCx} cy={headCy} r={headR} color={NEON_FILL} />
-            <Circle cx={headCx} cy={headCy} r={headR} color={NEON_CORE} style="stroke" strokeWidth={5} />
+            <Circle cx={headCx} cy={headCy} r={headR} color={NEON_CORE} style="stroke" strokeWidth={4} />
           </Canvas>
         </View>
       </Animated.View>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     top: 0,
     width: GUIDE_W,
     height: GUIDE_H,
-    zIndex: 10,
+    zIndex: 5,
   },
   inner: {
     width: GUIDE_W,
