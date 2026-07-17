@@ -1,6 +1,6 @@
 import { useIsFocused } from '@react-navigation/native';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   AppState,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { type CameraPosition, useCameraDevice } from 'react-native-vision-camera';
 
-import { CameraView } from '../../src/camera/CameraView';
+import { CameraView, type CapturedPhoto } from '../../src/camera/CameraView';
 import { useCameraPermissions } from '../../src/camera/useCameraPermissions';
 import { supabase } from '../../src/supabase/client';
 import { useReference } from '../../src/supabase/queries';
@@ -34,6 +34,7 @@ function useAppIsActive() {
 
 export default function ShootScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { data: reference, isLoading } = useReference(id);
   const { granted, request } = useCameraPermissions();
   const [facing, setFacing] = useState<CameraPosition>('back');
@@ -57,6 +58,22 @@ export default function ShootScreen() {
       alive = false;
     };
   }, [reference?.image_path]);
+
+  const handleCaptured = useCallback(
+    (photo: CapturedPhoto) => {
+      if (!id) return;
+      router.push({
+        pathname: '/shoot/review',
+        params: {
+          uri: encodeURIComponent(photo.uri),
+          score: String(photo.score),
+          referenceId: id,
+          referenceUrl: encodeURIComponent(thumbnailUrl ?? ''),
+        },
+      });
+    },
+    [id, router, thumbnailUrl],
+  );
 
   if (isLoading || !reference) {
     return (
@@ -96,6 +113,7 @@ export default function ShootScreen() {
         targetBbox={reference.bounding_box}
         targetImageUrl={thumbnailUrl}
         onFlipCamera={() => setFacing((current) => (current === 'back' ? 'front' : 'back'))}
+        onCaptured={handleCaptured}
       />
       {thumbnailUrl ? (
         <Image source={{ uri: thumbnailUrl }} style={styles.thumbnail} />

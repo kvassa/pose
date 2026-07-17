@@ -44,7 +44,7 @@ export function MatchIndicator() {
 const styles = StyleSheet.create({
   wrap: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 170,
     left: 0,
     right: 0,
     alignItems: 'center',

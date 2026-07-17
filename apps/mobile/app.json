@@ -22,6 +22,14 @@
           "cameraPermissionText": "Pose Match needs camera access to help you match poses.",
           "enableFrameProcessors": true
         }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Pose Match saves matched shots to your photo library.",
+          "savePhotosPermission": "Pose Match saves matched shots to your photo library.",
+          "isAccessMediaLocationEnabled": false
+        }
       ]
     ],
     "extra": {

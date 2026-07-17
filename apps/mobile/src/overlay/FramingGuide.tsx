@@ -1,29 +1,33 @@
 import type { BoundingBox } from '@pose-match/shared-types';
-import { compareFraming } from '@pose-match/pose-math';
-import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
 
-import { liveBboxSV } from '../state/frameState';
+import { createFatigueTracker } from '../guidance/cueFatigue';
+import { framingHints } from '../guidance/framingCues';
+import { compareToGuide } from '../guidance/guideFraming';
+import type { FrameMeta } from './mapCoords';
+import { liveBboxSV, liveFrameMetaSV, matchScoreSV } from '../state/frameState';
+import { guideTransformSV, type GuideTransform } from '../state/guideState';
 
 type FramingGuideProps = {
   targetBbox: BoundingBox | null;
+  /** True for the selfie camera. */
+  facingFront: boolean;
 };
-
-type ArrowHint = {
-  symbol: string;
-  label: string;
-  size: number;
-};
-
-const IOU_HIDE = 0.85;
 
 /**
- * Arrows that tell you how to shift so you fill the same space as the reference.
- * Hidden when you're already lined up well.
+ * Arrow that tells you how to shift to line up with the movable green guide.
+ * Hidden at score ≥ 85. Same arrow for 45s → skip to next framing issue or hide.
  */
-export function FramingGuide({ targetBbox }: FramingGuideProps) {
+export function FramingGuide({ targetBbox, facingFront }: FramingGuideProps) {
+  const { width: viewW, height: viewH } = useWindowDimensions();
   const [liveBbox, setLiveBbox] = useState<BoundingBox | null>(null);
+  const [meta, setMeta] = useState<FrameMeta | null>(null);
+  const [guide, setGuide] = useState<GuideTransform | null>(null);
+  const [score, setScore] = useState(0);
+  const [tick, setTick] = useState(0);
+  const fatigue = useRef(createFatigueTracker()).current;
 
   useAnimatedReaction(
     () => liveBboxSV.value,
@@ -33,42 +37,67 @@ export function FramingGuide({ targetBbox }: FramingGuideProps) {
     [],
   );
 
+  useAnimatedReaction(
+    () => liveFrameMetaSV.value,
+    (next) => {
+      runOnJS(setMeta)(next);
+    },
+    [],
+  );
+
+  useAnimatedReaction(
+    () => guideTransformSV.value,
+    (next) => {
+      runOnJS(setGuide)(next);
+    },
+    [],
+  );
+
+  useAnimatedReaction(
+    () => Math.round(matchScoreSV.value),
+    (next) => {
+      runOnJS(setScore)(next);
+    },
+    [],
+  );
+
   useEffect(() => {
     setLiveBbox(liveBboxSV.value);
+    setMeta(liveFrameMetaSV.value);
+    setGuide(guideTransformSV.value);
+    setScore(Math.round(matchScoreSV.value));
   }, []);
 
-  const hint = useMemo((): ArrowHint | null => {
-    if (!targetBbox || !liveBbox) return null;
+  useEffect(() => {
+    const id = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
 
-    const diff = compareFraming(targetBbox, liveBbox);
-    if (diff.iou > IOU_HIDE) return null;
+  useEffect(() => {
+    fatigue.reset();
+  }, [facingFront, fatigue]);
 
-    const absDx = Math.abs(diff.dx);
-    const absDy = Math.abs(diff.dy);
-    const scaleOff = Math.abs(Math.log(Math.max(diff.dScale, 0.01)));
-
-    // Prefer the biggest problem: position vs size.
-    if (scaleOff > 0.25 && scaleOff >= absDx && scaleOff >= absDy) {
-      if (diff.dScale < 1) {
-        return { symbol: '＋', label: 'closer', size: 28 + scaleOff * 40 };
-      }
-      return { symbol: '－', label: 'back', size: 28 + scaleOff * 40 };
+  const hint = useMemo(() => {
+    if (score >= 85 || !targetBbox || !liveBbox || !guide || !meta || viewW <= 0) {
+      return null;
     }
-
-    if (absDx >= absDy) {
-      if (diff.dx > 0) {
-        // Live is right of target → move left
-        return { symbol: '←', label: 'left', size: 28 + absDx * 80 };
-      }
-      return { symbol: '→', label: 'right', size: 28 + absDx * 80 };
-    }
-
-    if (diff.dy > 0) {
-      // Live is below target → move up
-      return { symbol: '↑', label: 'up', size: 28 + absDy * 80 };
-    }
-    return { symbol: '↓', label: 'down', size: 28 + absDy * 80 };
-  }, [targetBbox, liveBbox]);
+    // Compare to the green guide you see — not the original photo box.
+    const diff = compareToGuide({
+      liveBbox,
+      targetBbox,
+      guide,
+      meta,
+      viewW,
+      viewH,
+      facingFront,
+    });
+    const candidates = framingHints(diff, {
+      facingFront,
+      displaySpace: true,
+    });
+    return fatigue.pick(candidates);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetBbox, liveBbox, guide, meta, facingFront, score, tick, fatigue, viewW, viewH]);
 
   if (!hint) return null;
 
